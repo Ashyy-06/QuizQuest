@@ -1,7 +1,10 @@
-
 package database;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,23 +19,28 @@ public class QuestionDAO {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
+        boolean isEmpty = false;
 
         try {
             conn = DatabaseManager.getConnection();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(countSql);
             if (rs.next() && rs.getInt(1) == 0) {
-                insertDefaultQuestions();
+                isEmpty = true;
             }
         } catch (SQLException e) {
             System.err.println("Error checking question count: " + e.getMessage());
         } finally {
             closeResources(rs, stmt, conn);
         }
+
+        if (isEmpty) {
+            insertDefaultQuestions();
+        }
     }
 
     private void insertDefaultQuestions() {
-
+        
         addQuestion("Science", "MCQ", "The chemical reaction between copper and oxygen can be categorized as:", 
                 "Displacement reaction|Decomposition reaction|Combination reaction|Double displacement reaction", "3");
         addQuestion("Science", "MCQ", "Opening and closing of stomatal pore depends on:", 
