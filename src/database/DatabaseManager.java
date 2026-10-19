@@ -39,13 +39,37 @@ public class DatabaseManager {
                 + "FOREIGN KEY(user_id) REFERENCES users(id)"
                 + ");";
 
-        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+        Connection conn = null;
+        Statement stmt = null;
+
+        try {
+            conn = getConnection();
+            stmt = conn.createStatement();
+
             stmt.execute(createUsersTable);
             stmt.execute(createQuestionsTable);
             stmt.execute(createResultsTable);
+
             System.out.println("Database and tables initialized successfully!");
         } catch (SQLException e) {
             System.err.println("Database initialization failed: " + e.getMessage());
+        } finally {
+            // Explicitly close Statement first, then Connection
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Failed to close statement: " + e.getMessage());
+            }
+
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Failed to close connection: " + e.getMessage());
+            }
         }
     }
 }
