@@ -8,11 +8,35 @@ import java.sql.Statement;
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:quizquest.db";
 
-    public static Connection getConnection() throws SQLException {
+    private static volatile DatabaseManager instance;
+
+    private DatabaseManager() {
+    }
+
+    public static DatabaseManager getInstance() {
+        if (instance == null) {
+            synchronized (DatabaseManager.class) {
+                if (instance == null) {
+                    instance = new DatabaseManager();
+                }
+            }
+        }
+        return instance;
+    }
+
+    public Connection connect() throws SQLException {
         return DriverManager.getConnection(DB_URL);
     }
 
+    public static Connection getConnection() throws SQLException {
+        return getInstance().connect();
+    }
+
     public static void initializeDatabase() {
+        getInstance().initTables();
+    }
+
+    public void initTables() {
         String createUsersTable = "CREATE TABLE IF NOT EXISTS users ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "username TEXT UNIQUE NOT NULL, "
@@ -43,7 +67,7 @@ public class DatabaseManager {
         Statement stmt = null;
 
         try {
-            conn = getConnection();
+            conn = connect();
             stmt = conn.createStatement();
 
             stmt.execute(createUsersTable);
@@ -54,19 +78,14 @@ public class DatabaseManager {
         } catch (SQLException e) {
             System.err.println("Database initialization failed: " + e.getMessage());
         } finally {
-            // Explicitly close Statement first, then Connection
             try {
-                if (stmt != null) {
-                    stmt.close();
-                }
+                if (stmt != null) stmt.close();
             } catch (SQLException e) {
                 System.err.println("Failed to close statement: " + e.getMessage());
             }
 
             try {
-                if (conn != null) {
-                    conn.close();
-                }
+                if (conn != null) conn.close();
             } catch (SQLException e) {
                 System.err.println("Failed to close connection: " + e.getMessage());
             }
