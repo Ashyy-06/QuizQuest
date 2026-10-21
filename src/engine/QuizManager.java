@@ -7,7 +7,8 @@ import database.QuizResultDAO;
 import models.Question;
 import models.StudentUser;
 
-public class QuizManager {
+public class QuizManager 
+{
 
     private QuestionDAO questionDAO;
     private QuizResultDAO resultDAO;
@@ -15,17 +16,20 @@ public class QuizManager {
     private Quiz quiz;
     private int currentQuestion;
 
-    public QuizManager() {
+    public QuizManager() 
+    {
         questionDAO = new QuestionDAO();
         resultDAO = new QuizResultDAO();
         currentQuestion = 0;
     }
 
-    public boolean startQuiz(StudentUser student, String topic, int numberOfQuestions) {
+    public boolean startQuiz(StudentUser student, String topic, int numberOfQuestions) 
+    {
 
         questions = questionDAO.getRandomQuestionsByTopic(topic, numberOfQuestions);
 
-        if (questions == null || questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) 
+        {
             quiz = null;
             return false;
         }
@@ -36,26 +40,31 @@ public class QuizManager {
         return true;
     }
 
-    public Question getCurrentQuestion() {
+    public Question getCurrentQuestion() 
+    {
 
-        if (questions == null || currentQuestion >= questions.size()) {
+        if (questions == null || currentQuestion >= questions.size()) 
+        {
             return null;
         }
 
         return questions.get(currentQuestion);
     }
 
-    public boolean submitAnswer(Object answer) {
+    public boolean submitAnswer(Object answer) 
+    {
 
         Question question = getCurrentQuestion();
 
-        if (question == null) {
+        if (question == null) 
+        {
             return false;
         }
 
         boolean correct = question.evaluateAnswer(answer);
 
-        if (correct) {
+        if (correct) 
+        {
             quiz.addCorrectAnswer();
         }
 
@@ -64,25 +73,31 @@ public class QuizManager {
         return correct;
     }
 
-    public boolean isQuizFinished() {
+    public boolean isQuizFinished() 
+    {
         return questions == null || currentQuestion >= questions.size();
     }
 
-    public int getCorrectAnswers() {
+    public int getCorrectAnswers() 
+    {
         return quiz == null ? 0 : quiz.getCorrectAnswers();
     }
 
-    public int getTotalQuestions() {
+    public int getTotalQuestions() 
+    {
         return quiz == null ? 0 : quiz.getTotalQuestions();
     }
 
-    public Quiz getQuiz() {
+    public Quiz getQuiz() 
+    {
         return quiz;
     }
 
-    public boolean saveResult() {
+    public boolean saveResult() 
+    {
 
-        if (quiz == null) {
+        if (quiz == null) 
+        {
             return false;
         }
 

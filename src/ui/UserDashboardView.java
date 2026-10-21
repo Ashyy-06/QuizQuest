@@ -27,7 +27,8 @@ import models.StudentUser;
 import models.TrueFalseQuestion;
 import models.User;
 
-public class UserDashboardView extends JFrame implements ActionListener {
+public class UserDashboardView extends JFrame implements ActionListener 
+{
     private final User user;
     private JComboBox<String> topicBox;
     private JButton startButton;    
@@ -38,7 +39,8 @@ public class UserDashboardView extends JFrame implements ActionListener {
     private QuestionDAO questionDAO;
     private QuoteService quoteService;
 
-    public UserDashboardView(User user) {
+    public UserDashboardView(User user) 
+    {
         this.user = user;
         this.resultDAO = new QuizResultDAO();
         this.questionDAO = new QuestionDAO();
@@ -55,11 +57,12 @@ public class UserDashboardView extends JFrame implements ActionListener {
         JLabel welcomeLabel = new JLabel("Welcome, " + this.user.getUsername() + "!", JLabel.CENTER);
         JLabel topicLabel = new JLabel("Select a Quiz Topic:");
         
-        // Dynamically populate topics directly from database
         List<String> availableTopics = questionDAO.getAllTopics();
-        if (availableTopics != null && !availableTopics.isEmpty()) {
+        if (availableTopics != null && !availableTopics.isEmpty()) 
+        {
             topicBox = new JComboBox<>(availableTopics.toArray(new String[0]));
-        } else {
+        } else 
+        {
             topicBox = new JComboBox<>(new String[]{"No Topics Available"});
         }
 
@@ -89,10 +92,13 @@ public class UserDashboardView extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == startButton) {
+    public void actionPerformed(ActionEvent e) 
+    {
+        if (e.getSource() == startButton) 
+        {
             startQuizFlow();
-        } else if (e.getSource() == instructionsButton) {
+        } else if (e.getSource() == instructionsButton)
+        {
             JOptionPane.showMessageDialog(
                 this,
                 "Instructions:\n"
@@ -104,53 +110,61 @@ public class UserDashboardView extends JFrame implements ActionListener {
                 "Quiz Instructions",
                 JOptionPane.INFORMATION_MESSAGE
             );
-        } else if (e.getSource() == scorecardButton) {
+        } else if (e.getSource() == scorecardButton) 
+        {
             viewScorecard();
-        } else if (e.getSource() == logoutButton) {
+        } else if (e.getSource() == logoutButton) 
+        {
             dispose();
             new AuthView();
         }
     }
 
-    /**
-     * Connects QuizManager to the GUI flow
-     */
-    private void startQuizFlow() {
+    private void startQuizFlow() 
+    {
         String topic = (String) topicBox.getSelectedItem();
-        if (topic == null || "No Topics Available".equals(topic)) {
+        if (topic == null || "No Topics Available".equals(topic)) 
+        {
             JOptionPane.showMessageDialog(this, "No valid quiz topic selected or available.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         StudentUser student;
-        if (user instanceof StudentUser) {
+        if (user instanceof StudentUser) 
+        {
             student = (StudentUser) user;
-        } else {
+        } else 
+        {
             student = new StudentUser(user.getUserId(), user.getUsername(), user.getPassword());
         }
 
         QuizManager manager = new QuizManager();
-        boolean started = manager.startQuiz(student, topic, 5); // Load 5 random questions
+        boolean started = manager.startQuiz(student, topic, 5); 
 
-        if (!started) {
+        if (!started) 
+        {
             JOptionPane.showMessageDialog(this, "No questions found for " + topic + "!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         int questionNumber = 1;
-        while (!manager.isQuizFinished()) {
+        while (!manager.isQuizFinished()) 
+        {
             Question q = manager.getCurrentQuestion();
             if (q == null) break;
 
-            if (q instanceof SingleChoiceMCQ) {
+            if (q instanceof SingleChoiceMCQ) 
+            {
                 SingleChoiceMCQ mcq = (SingleChoiceMCQ) q;
                 List<String> options = mcq.getOptions();
                 String[] optionChoices = new String[options.size()];
-                for (int i = 0; i < options.size(); i++) {
+                for (int i = 0; i < options.size(); i++) 
+                {
                     optionChoices[i] = (i + 1) + ". " + options.get(i);
                 }
 
-                String selection = (String) JOptionPane.showInputDialog(
+                String selection = (String) JOptionPane.showInputDialog
+                (
                     this,
                     "Question " + questionNumber + ":\n" + mcq.getPrompt(),
                     "Quiz: " + topic,
@@ -160,26 +174,30 @@ public class UserDashboardView extends JFrame implements ActionListener {
                     optionChoices[0]
                 );
 
-                if (selection == null) {
+                if (selection == null) 
+                {
                     JOptionPane.showMessageDialog(this, "Quiz cancelled.");
                     return;
                 }
 
-                // Determine chosen index (1-based)
                 int chosenIndex = 1;
-                for (int i = 0; i < optionChoices.length; i++) {
-                    if (optionChoices[i].equals(selection)) {
+                for (int i = 0; i < optionChoices.length; i++) 
+                {
+                    if (optionChoices[i].equals(selection)) 
+                    {
                         chosenIndex = i + 1;
                         break;
                     }
                 }
                 manager.submitAnswer(chosenIndex);
 
-            } else if (q instanceof TrueFalseQuestion) {
+            } else if (q instanceof TrueFalseQuestion) 
+            {
                 TrueFalseQuestion tf = (TrueFalseQuestion) q;
                 String[] tfChoices = new String[]{"True", "False"};
 
-                String selection = (String) JOptionPane.showInputDialog(
+                String selection = (String) JOptionPane.showInputDialog
+                (
                     this,
                     "Question " + questionNumber + ":\n" + tf.getPrompt(),
                     "Quiz: " + topic,
@@ -189,7 +207,8 @@ public class UserDashboardView extends JFrame implements ActionListener {
                     "True"
                 );
 
-                if (selection == null) {
+                if (selection == null) 
+                {
                     JOptionPane.showMessageDialog(this, "Quiz cancelled.");
                     return;
                 }
@@ -201,10 +220,8 @@ public class UserDashboardView extends JFrame implements ActionListener {
             questionNumber++;
         }
 
-        // Save result to DB
         manager.saveResult();
 
-        // Show Score Summary & Motivational Quote
         String quote = quoteService.getRandomQuote();
         String summary = "Quiz Completed!\n\n"
                        + "Topic: " + topic + "\n"
@@ -214,13 +231,12 @@ public class UserDashboardView extends JFrame implements ActionListener {
         JOptionPane.showMessageDialog(this, summary, "Results Saved", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Connects QuizResultDAO to view past attempts
-     */
-    private void viewScorecard() {
+    private void viewScorecard() 
+    {
         List<QuizResult> history = resultDAO.getResultsByUserId(user.getUserId());
 
-        if (history == null || history.isEmpty()) {
+        if (history == null || history.isEmpty()) 
+        {
             JOptionPane.showMessageDialog(this, "No quiz attempts recorded yet.", "Scorecard", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
@@ -229,7 +245,8 @@ public class UserDashboardView extends JFrame implements ActionListener {
         sb.append(String.format("%-6s | %-15s | %-8s | %-10s\n", "ID", "Topic", "Score", "Total"));
         sb.append("--------------------------------------------------\n");
 
-        for (QuizResult r : history) {
+        for (QuizResult r : history) 
+        {
             sb.append(String.format("%-6d | %-15s | %-8d | %-10d\n", 
                 r.getResultId(), r.getTopic(), r.getScore(), r.getTotalQuestions()));
         }
