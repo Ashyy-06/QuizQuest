@@ -156,7 +156,7 @@ public class AuthView extends JFrame {
     }
     private void handleLogin() {
         String username = usernameField.getText().trim();
-        String password = new String(passwordField.getPassword());
+        String password = new String(passwordField.getPassword()).trim();
 
         if (username.isEmpty() || password.isEmpty() || username.equals("Enter username") || password.equals("Enter password")) {
             JOptionPane.showMessageDialog(this, "Please enter both username and password.", "Input Error", JOptionPane.ERROR_MESSAGE);
@@ -178,18 +178,21 @@ public class AuthView extends JFrame {
     }
     private void handleRegister() {
         String username = usernameField.getText().trim();
-        String password = new String(passwordField.getPassword());
+        String password = new String(passwordField.getPassword()).trim();
 
         if (username.isEmpty() || password.isEmpty() || username.equals("Enter username") || password.equals("Enter password")) {
             JOptionPane.showMessageDialog(this, "Please enter both username and password.", "Input Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        boolean success = userDAO.createUser(username, password,"Student");
-        if (success) {
-            JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.");
-        } else {
-            JOptionPane.showMessageDialog(this, "Registration failed. Username may already exist.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
+        try{
+            boolean success = userDAO.register(username, password);
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Registration failed. Username may already exist.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "An error occurred during registration.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
