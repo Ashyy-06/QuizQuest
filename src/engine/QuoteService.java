@@ -1,7 +1,9 @@
 package engine;
 
-public class QuoteService{
-    private String[] quotes ={
+public class QuoteService
+{
+    private String[] quotes =
+    {
         "Believe in yourself and keep learning!",
         "Every mistake is a step towards improvement.",
         "Small progress is still progress.",
@@ -9,13 +11,15 @@ public class QuoteService{
         "Your effort today builds your success tomorrow."
     };
 
-    public String getRandomQuote(){
+    public String getRandomQuote()
+    {
         int index = (int)(Math.random() * quotes.length);
 
         return quotes[index];
     }
 
-    public void displayQuote(){
+    public void displayQuote()
+    {
         System.out.println("\n" + getRandomQuote());
     }
 }

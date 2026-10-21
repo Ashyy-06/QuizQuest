@@ -9,12 +9,14 @@ import javax.swing.*;
 import models.Question;
 import models.User;
 
-public class AdminDashboardView extends JFrame {
+public class AdminDashboardView extends JFrame 
+{
 
     private final User adminUser;
     private final QuestionDAO questionDAO;
 
-    public AdminDashboardView(User adminUser) {
+    public AdminDashboardView(User adminUser) 
+    {
         this.adminUser = adminUser;
         this.questionDAO = new QuestionDAO();
 
@@ -24,7 +26,7 @@ public class AdminDashboardView extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Top Header
+
         JPanel headerPanel = new JPanel(new GridLayout(2, 1, 5, 5));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
 
@@ -39,7 +41,7 @@ public class AdminDashboardView extends JFrame {
         headerPanel.add(welcomeLabel);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Center Buttons
+        
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 12, 12));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 40, 20, 40));
 
@@ -54,31 +56,39 @@ public class AdminDashboardView extends JFrame {
         buttonPanel.add(btnLogout);
         add(buttonPanel, BorderLayout.CENTER);
 
-        // Action Listeners
-        btnAddQuestion.addActionListener(new ActionListener() {
+        
+        btnAddQuestion.addActionListener(new ActionListener()
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) 
+            {
                 addQuestion();
             }
         });
 
-        btnViewQuestions.addActionListener(new ActionListener() {
+        btnViewQuestions.addActionListener(new ActionListener() 
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) 
+            {
                 viewQuestions();
             }
         });
 
-        btnDeleteQuestion.addActionListener(new ActionListener() {
+        btnDeleteQuestion.addActionListener(new ActionListener() 
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) 
+            {
                 deleteQuestion();
             }
         });
 
-        btnLogout.addActionListener(new ActionListener() {
+        btnLogout.addActionListener(new ActionListener() 
+        {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) 
+            {
                 dispose();
                 new AuthView().setVisible(true);
             }
@@ -87,22 +97,18 @@ public class AdminDashboardView extends JFrame {
         setVisible(true);
     }
 
-    /**
-     * Collects question details in the exact format QuestionDAO expects:
-     * - Topic string
-     * - Type: "MCQ" or "TRUE_FALSE"
-     * - Options delimited with '|'
-     * - Answer: "1"-"4" for MCQ (parsed as int by DAO), or "true"/"false" for TRUE_FALSE
-     */
-    private void addQuestion() {
-        String topic = JOptionPane.showInputDialog(this, "Enter the topic (e.g., Science, Social Science):");
+    
+    private void addQuestion() 
+    {
+        String topic = JOptionPane.showInputDialog(this, "Enter the topic(e.g., Science, Social Science):");
         if (topic == null || topic.trim().isEmpty()) return;
 
         String prompt = JOptionPane.showInputDialog(this, "Enter the question prompt:");
         if (prompt == null || prompt.trim().isEmpty()) return;
 
         String[] types = {"Single Choice MCQ", "True / False"};
-        int selectedType = JOptionPane.showOptionDialog(
+        int selectedType = JOptionPane.showOptionDialog
+        (
                 this,
                 "Select question type:",
                 "Question Type",
@@ -117,7 +123,8 @@ public class AdminDashboardView extends JFrame {
 
         boolean success = false;
 
-        if (selectedType == 0) { // MCQ
+        if (selectedType == 0) 
+        { 
             String opt1 = JOptionPane.showInputDialog(this, "Option 1:");
             if (opt1 == null || opt1.trim().isEmpty()) return;
 
@@ -130,14 +137,16 @@ public class AdminDashboardView extends JFrame {
             String opt4 = JOptionPane.showInputDialog(this, "Option 4:");
             if (opt4 == null || opt4.trim().isEmpty()) return;
 
-            String[] choices = {
+            String[] choices = 
+            {
                 "1 (" + opt1.trim() + ")",
                 "2 (" + opt2.trim() + ")",
                 "3 (" + opt3.trim() + ")",
                 "4 (" + opt4.trim() + ")"
             };
 
-            int answerChoice = JOptionPane.showOptionDialog(
+            int answerChoice = JOptionPane.showOptionDialog
+            (
                     this,
                     "Select which option is the correct answer:",
                     "Correct Answer",
@@ -150,16 +159,16 @@ public class AdminDashboardView extends JFrame {
 
             if (answerChoice == JOptionPane.CLOSED_OPTION) return;
 
-            // Formats with pipe '|' to match QuestionDAO's split("\\|")
             String optionsCombined = opt1.trim() + "|" + opt2.trim() + "|" + opt3.trim() + "|" + opt4.trim();
-            // Answers as "1", "2", "3", or "4" to match QuestionDAO's Integer.parseInt(answer.trim())
             String answerIndex = String.valueOf(answerChoice + 1);
 
             success = questionDAO.addQuestion(topic.trim(), "MCQ", prompt.trim(), optionsCombined, answerIndex);
 
-        } else if (selectedType == 1) { // True / False
+        } else if (selectedType == 1) 
+        { 
             String[] tfOptions = {"True", "False"};
-            int tfChoice = JOptionPane.showOptionDialog(
+            int tfChoice = JOptionPane.showOptionDialog
+            (
                     this,
                     "Select the correct answer:",
                     "Correct Answer",
@@ -172,33 +181,34 @@ public class AdminDashboardView extends JFrame {
 
             if (tfChoice == JOptionPane.CLOSED_OPTION) return;
 
-            // Type must be "TRUE_FALSE", options empty, and answer boolean string for Boolean.parseBoolean(...)
             String answer = (tfChoice == 0) ? "true" : "false";
 
             success = questionDAO.addQuestion(topic.trim(), "TRUE_FALSE", prompt.trim(), "", answer);
         }
 
-        if (success) {
+        if (success) 
+        {
             JOptionPane.showMessageDialog(this, "Question added and saved to database successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-        } else {
+        } else 
+        {
             JOptionPane.showMessageDialog(this, "Failed to save question to database.", "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /**
-     * Reads all questions using QuestionDAO.getAllQuestions() and displays ID, points, and prompt.
-     */
-    private void viewQuestions() {
+    private void viewQuestions() 
+    {
         List<Question> questions = questionDAO.getAllQuestions();
 
-        if (questions == null || questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) 
+        {
             JOptionPane.showMessageDialog(this, "No questions found in the database.", "All Questions", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         StringBuilder details = new StringBuilder();
 
-        for (Question q : questions) {
+        for (Question q : questions) 
+        {
             details.append("[ID: ").append(q.getId()).append("] (")
                    .append(q.getPoints()).append(" pts)\n")
                    .append(q.getPrompt()).append("\n\n");
@@ -217,23 +227,25 @@ public class AdminDashboardView extends JFrame {
         JOptionPane.showMessageDialog(this, scrollPane, "All Questions (Total: " + questions.size() + ")", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    /**
-     * Prompts for Question ID and calls questionDAO.deleteQuestion(id).
-     */
-    private void deleteQuestion() {
+    private void deleteQuestion() 
+    {
         String inputId = JOptionPane.showInputDialog(this, "Enter Question ID to delete:");
         if (inputId == null || inputId.trim().isEmpty()) return;
 
-        try {
+        try 
+        {
             int questionId = Integer.parseInt(inputId.trim());
             boolean success = questionDAO.deleteQuestion(questionId);
 
-            if (success) {
+            if (success) 
+            {
                 JOptionPane.showMessageDialog(this, "Question [ID: " + questionId + "] deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            } else {
+            } else 
+            {
                 JOptionPane.showMessageDialog(this, "Question ID " + questionId + " could not be found.", "Not Found", JOptionPane.WARNING_MESSAGE);
             }
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException ex) 
+        {
             JOptionPane.showMessageDialog(this, "Please enter a valid numeric ID.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
         }
     }

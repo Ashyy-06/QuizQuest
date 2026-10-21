@@ -10,17 +10,20 @@ import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
-public class AuthView extends JFrame {
+public class AuthView extends JFrame 
+{
     private JTextField usernameField;
     private JPasswordField passwordField;
     private UserDAO userDAO;
 
-    public AuthView() {
+    public AuthView() 
+    {
         this.userDAO = new UserDAO();
         initUI();
         SwingUtilities.invokeLater(() ->this.getContentPane().requestFocusInWindow());
     }
-    private void initUI() {
+    private void initUI() 
+    {
         setTitle("QuizQuest - Login & Registration");
         setSize(420, 340);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -92,14 +95,18 @@ public class AuthView extends JFrame {
         registerButton.addActionListener(e -> handleRegister());
         this.getContentPane().requestFocusInWindow();
     }
-    private void styleTextField(JTextField field) {
+
+    private void styleTextField(JTextField field) 
+    {
         field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         field.setForeground(Color.GRAY);
         field.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(6, 8, 6, 8)));
     }
-    private void stylePasswordField(JPasswordField field) {
+
+    private void stylePasswordField(JPasswordField field) 
+    {
         field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         field.setForeground(Color.GRAY);
         field.setEchoChar((char) 0);
@@ -107,46 +114,61 @@ public class AuthView extends JFrame {
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 BorderFactory.createEmptyBorder(6, 8, 6, 8)));
     }
-    private void styleButton(JButton button, Color bgColor) {
+
+    private void styleButton(JButton button, Color bgColor) 
+    {
         button.setFont(new Font("Segoe UI", Font.BOLD, 12));
         button.setBackground(bgColor);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
     }
-    private void addPlaceholder(JTextField textField, String placeholder) {
-        textField.addFocusListener(new FocusAdapter() {
+
+    private void addPlaceholder(JTextField textField, String placeholder) 
+    {
+        textField.addFocusListener(new FocusAdapter() 
+        {
             @Override
-            public void focusGained(FocusEvent e) {
-                if (textField.getText().equals(placeholder)) {
+            public void focusGained(FocusEvent e) 
+            {
+                if (textField.getText().equals(placeholder)) 
+                {
                     textField.setText("");
                     textField.setForeground(Color.BLACK);
                 }
             }
             @Override
-            public void focusLost(FocusEvent e) {
-                if (textField.getText().isEmpty()) {
+            public void focusLost(FocusEvent e) 
+            {
+                if (textField.getText().isEmpty()) 
+                {
                     textField.setForeground(Color.GRAY);
                     textField.setText(placeholder);
                 }
             }
         });
     }
-    private void addPlaceholderPassword(JPasswordField passwordField, String placeholder) {
-        passwordField.addFocusListener(new FocusAdapter() {
+    private void addPlaceholderPassword(JPasswordField passwordField, String placeholder) 
+    {
+        passwordField.addFocusListener(new FocusAdapter() 
+        {
             @Override
-            public void focusGained(FocusEvent e) {
+            public void focusGained(FocusEvent e) 
+            {
                 String passText= new String(passwordField.getPassword());
-                if (passText.equals(placeholder)) {
+                if (passText.equals(placeholder)) 
+                {
                     passwordField.setText("");
                     passwordField.setForeground(Color.BLACK);
                     passwordField.setEchoChar('•');
                 }
             }
             @Override
-            public void focusLost(FocusEvent e) {
+            public void focusLost(FocusEvent e) 
+            {
                 String passText = new String(passwordField.getPassword());
-                if (passText.isEmpty()) {
+                if (passText.isEmpty()) 
+                {
                     passwordField.setForeground(Color.GRAY);
                     passwordField.setText(placeholder);
                     passwordField.setEchoChar((char) 0);
@@ -154,44 +176,58 @@ public class AuthView extends JFrame {
             }
         });
     }
-    private void handleLogin() {
+
+    private void handleLogin() 
+    {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
-        if (username.isEmpty() || password.isEmpty() || username.equals("Enter username") || password.equals("Enter password")) {
+        if (username.isEmpty() || password.isEmpty() || username.equals("Enter username") || password.equals("Enter password")) 
+        {
             JOptionPane.showMessageDialog(this, "Please enter both username and password.", "Input Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         User user = userDAO.login(username, password);
-        if (user != null) {
+        if (user != null) 
+        {
             JOptionPane.showMessageDialog(this, "Login successful! Welcome, " + user.getUsername());
             this.dispose();
-            if (user instanceof Admin) {
+            if (user instanceof Admin) 
+            {
                 new AdminDashboardView((Admin) user).setVisible(true);
-            } else if (user instanceof StudentUser) {
+            } else if (user instanceof StudentUser) 
+            {
                 new UserDashboardView((StudentUser) user).setVisible(true);
             }
-        } else {
+        } else 
+        {
             JOptionPane.showMessageDialog(this, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
         }
     }
-    private void handleRegister() {
+
+    private void handleRegister() 
+    {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
-        if (username.isEmpty() || password.isEmpty() || username.equals("Enter username") || password.equals("Enter password")) {
+        if (username.isEmpty() || password.isEmpty() || username.equals("Enter username") || password.equals("Enter password")) 
+        {
             JOptionPane.showMessageDialog(this, "Please enter both username and password.", "Input Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        try{
+        try
+        {
             boolean success = userDAO.register(username, password);
-            if (success) {
+            if (success) 
+            {
                 JOptionPane.showMessageDialog(this, "Registration successful! You can now log in.");
-            } else {
+            } else 
+            {
                 JOptionPane.showMessageDialog(this, "Registration failed. Username may already exist.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception e) {
+        } catch (Exception e) 
+        {
             JOptionPane.showMessageDialog(this, "An error occurred during registration.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
         }
     }

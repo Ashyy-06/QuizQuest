@@ -4,8 +4,10 @@ import database.UserDAO;
 import javax.swing.SwingUtilities;
 import ui.AuthView;
 
-public class Main {
-    public static void main(String[] args) {
+public class Main 
+{
+    public static void main(String[] args) 
+    {
 
         DatabaseManager.getInstance().initializeDatabase();
 
@@ -14,13 +16,17 @@ public class Main {
         UserDAO userDAO = new UserDAO();
         userDAO.seedAdminIfEmpty();
 
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() 
+        {
             @Override
-            public void run() {
-                try {
+            public void run() 
+            {
+                try 
+                {
                     AuthView view = new AuthView();
                     view.setVisible(true);
-                } catch (Throwable t) {
+                } catch (Throwable t) 
+                {
                     System.err.println("CRASH DURING AUTHVIEW LAUNCH:");
                     t.printStackTrace();
                 }

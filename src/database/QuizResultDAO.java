@@ -5,14 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import models.QuizResult;
 
-public class QuizResultDAO {
+public class QuizResultDAO 
+{
 
     public boolean saveResult(int userId, String topic, int totalQuestions, int correctAnswers) {
         String sql = "INSERT INTO quiz_results (user_id, topic, score, total) VALUES (?, ?, ?, ?)";
         Connection conn = null;
         PreparedStatement stmt = null;
 
-        try {
+        try 
+        {
             conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userId);
@@ -21,15 +23,18 @@ public class QuizResultDAO {
             stmt.setInt(4, totalQuestions);
 
             return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Error saving quiz result: " + e.getMessage());
             return false;
-        } finally {
+        } finally 
+        {
             closeResources(null, stmt, conn);
         }
     }
 
-    public List<QuizResult> getResultsByUserId(int userId) {
+    public List<QuizResult> getResultsByUserId(int userId) 
+    {
         List<QuizResult> list = new ArrayList<>();
         String sql = "SELECT qr.id, qr.user_id, u.username, qr.topic, qr.score, qr.total "
                    + "FROM quiz_results qr "
@@ -41,13 +46,15 @@ public class QuizResultDAO {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        try {
+        try 
+        {
             conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userId);
             rs = stmt.executeQuery();
 
-            while (rs.next()) {
+            while (rs.next()) 
+            {
                 int resultId = rs.getInt("id");
                 int uId = rs.getInt("user_id");
                 String username = rs.getString("username");
@@ -57,15 +64,18 @@ public class QuizResultDAO {
 
                 list.add(new QuizResult(resultId, uId, username, topic, total, score));
             }
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Error fetching user quiz history: " + e.getMessage());
-        } finally {
+        } finally 
+        {
             closeResources(rs, stmt, conn);
         }
         return list;
     }
 
-    public List<QuizResult> getAllResults() {
+    public List<QuizResult> getAllResults() 
+    {
         List<QuizResult> list = new ArrayList<>();
         String sql = "SELECT qr.id, qr.user_id, u.username, qr.topic, qr.score, qr.total "
                    + "FROM quiz_results qr "
@@ -76,12 +86,14 @@ public class QuizResultDAO {
         Statement stmt = null;
         ResultSet rs = null;
 
-        try {
+        try 
+        {
             conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
 
-            while (rs.next()) {
+            while (rs.next()) 
+            {
                 int resultId = rs.getInt("id");
                 int userId = rs.getInt("user_id");
                 String username = rs.getString("username");
@@ -91,26 +103,31 @@ public class QuizResultDAO {
 
                 list.add(new QuizResult(resultId, userId, username, topic, total, score));
             }
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Error fetching all quiz results: " + e.getMessage());
-        } finally {
+        } finally 
+        {
             closeResources(rs, stmt, conn);
         }
         return list;
     }
 
-    public boolean deleteResult(int resultId) {
+    public boolean deleteResult(int resultId) 
+    {
         String sql = "DELETE FROM quiz_results WHERE id = ?";
         Connection conn = null;
         PreparedStatement stmt = null;
 
-        try {
+        try 
+        {
             conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, resultId);
 
             return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Error deleting quiz result: " + e.getMessage());
             return false;
         } finally {
@@ -118,12 +135,14 @@ public class QuizResultDAO {
         }
     }
 
-    public boolean updateResult(int resultId, int newScore, int newTotal) {
+    public boolean updateResult(int resultId, int newScore, int newTotal) 
+    {
         String sql = "UPDATE quiz_results SET score = ?, total = ? WHERE id = ?";
         Connection conn = null;
         PreparedStatement stmt = null;
 
-        try {
+        try 
+        {
             conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, newScore);
@@ -131,36 +150,48 @@ public class QuizResultDAO {
             stmt.setInt(3, resultId);
 
             return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Error updating quiz result: " + e.getMessage());
             return false;
-        } finally {
+        } finally 
+        {
             closeResources(null, stmt, conn);
         }
     }
 
-    private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
-        try {
-            if (rs != null) {
+    private void closeResources(ResultSet rs, Statement stmt, Connection conn) 
+    {
+        try 
+        {
+            if (rs != null) 
+            {
                 rs.close();
             }
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Failed to close ResultSet: " + e.getMessage());
         }
 
-        try {
-            if (stmt != null) {
+        try 
+        {
+            if (stmt != null) 
+            {
                 stmt.close();
             }
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Failed to close Statement: " + e.getMessage());
         }
 
-        try {
-            if (conn != null) {
+        try 
+        {
+            if (conn != null) 
+            {
                 conn.close();
             }
-        } catch (SQLException e) {
+        } catch (SQLException e) 
+        {
             System.err.println("Failed to close Connection: " + e.getMessage());
         }
     }
