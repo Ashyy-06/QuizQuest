@@ -22,7 +22,7 @@ public class UserDAO {
         boolean needsAdmin = false;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(checkSql);
             if (rs.next() && rs.getInt(1) == 0) {
@@ -38,7 +38,7 @@ public class UserDAO {
             Connection insertConn = null;
             Statement insertStmt = null;
             try {
-                insertConn = DatabaseManager.getConnection();
+                insertConn = DatabaseManager.getInstance().getConnection();
                 insertStmt = insertConn.createStatement();
                 insertStmt.executeUpdate(insertSql);
                 System.out.println("Default admin created: admin / admin123");
@@ -56,7 +56,7 @@ public class UserDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, password);
@@ -77,7 +77,7 @@ public class UserDAO {
         ResultSet rs = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, username);
             stmt.setString(2, password);
@@ -111,7 +111,7 @@ public class UserDAO {
         ResultSet rs = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -141,7 +141,7 @@ public class UserDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, newPassword);
             stmt.setString(2, newRole.toUpperCase());
@@ -162,7 +162,7 @@ public class UserDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userId);
 

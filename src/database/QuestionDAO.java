@@ -14,34 +14,192 @@ import models.TrueFalseQuestion;
 
 public class QuestionDAO {
 
-    public void seedQuestionsIfEmpty() {
-        String countSql = "SELECT COUNT(*) FROM questions";
+    /**
+     * Retrieves all unique topics currently present in the questions table.
+     */
+    public List<String> getAllTopics() {
+        List<String> topics = new ArrayList<>();
+        String sql = "SELECT DISTINCT topic FROM questions ORDER BY topic ASC";
+
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
-        boolean isEmpty = false;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(countSql);
-            if (rs.next() && rs.getInt(1) == 0) {
-                isEmpty = true;
+            rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                String topic = rs.getString("topic");
+                if (topic != null && !topic.trim().isEmpty()) {
+                    topics.add(topic.trim());
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error checking question count: " + e.getMessage());
+            System.err.println("Error fetching topics: " + e.getMessage());
         } finally {
-            closeResources(rs, stmt, conn);
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+            } catch (SQLException e) {
+                System.err.println("Failed to close topic query resources: " + e.getMessage());
+            }
         }
 
-        if (isEmpty) {
-            insertDefaultQuestions();
+        return topics;
+    }
+
+    /**
+     * Inserts a new question into the database.
+     */
+    public boolean addQuestion(String topic, String type, String questionText, String options, String correctAnswer) {
+        String sql = "INSERT INTO questions (topic, type, question_text, options, correct_answer) VALUES (?, ?, ?, ?, ?)";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = DatabaseManager.getInstance().getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, topic);
+            pstmt.setString(2, type);
+            pstmt.setString(3, questionText);
+            pstmt.setString(4, options);
+            pstmt.setString(5, correctAnswer);
+
+            int rowsInserted = pstmt.executeUpdate();
+            return rowsInserted > 0;
+        } catch (SQLException e) {
+            System.err.println("Error adding question: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (pstmt != null) pstmt.close();
+            } catch (SQLException e) {
+                System.err.println("Failed to close statement: " + e.getMessage());
+            }
         }
     }
 
-    private void insertDefaultQuestions() {
-        
-        addQuestion("Science", "MCQ", "The chemical reaction between copper and oxygen can be categorized as:", 
+    /**
+     * Retrieves all questions from the database.
+     */
+    public List<Question> getAllQuestions() {
+        List<Question> questions = new ArrayList<>();
+        String sql = "SELECT * FROM questions";
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DatabaseManager.getInstance().getConnection();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                Question q = mapRowToQuestion(rs);
+                if (q != null) {
+                    questions.add(q);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving questions: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+            } catch (SQLException e) {
+                System.err.println("Failed to close resources: " + e.getMessage());
+            }
+        }
+
+        return questions;
+    }
+
+    /**
+     * Retrieves questions filtered by topic (case-insensitive).
+     */
+    public List<Question> getQuestionsByTopic(String topic) {
+        List<Question> questions = new ArrayList<>();
+        String sql = "SELECT * FROM questions WHERE LOWER(topic) = LOWER(?)";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DatabaseManager.getInstance().getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, topic.trim());
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Question q = mapRowToQuestion(rs);
+                if (q != null) {
+                    questions.add(q);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error retrieving questions for topic " + topic + ": " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+            } catch (SQLException e) {
+                System.err.println("Failed to close resources: " + e.getMessage());
+            }
+        }
+
+        return questions;
+    }
+
+    /**
+     * Deletes a question by its primary key ID.
+     */
+    public boolean deleteQuestion(int id) {
+        String sql = "DELETE FROM questions WHERE id = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            conn = DatabaseManager.getInstance().getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, id);
+
+            int rowsDeleted = pstmt.executeUpdate();
+            return rowsDeleted > 0;
+        } catch (SQLException e) {
+            System.err.println("Error deleting question ID " + id + ": " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (pstmt != null) pstmt.close();
+            } catch (SQLException e) {
+                System.err.println("Failed to close statement: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Seeds initial questions if the table is empty.
+     */
+    public void seedDefaultQuestions() {
+        String checkSql = "SELECT COUNT(*) FROM questions";
+
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DatabaseManager.getInstance().getConnection();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(checkSql);
+
+            if (rs.next() && rs.getInt(1) == 0) {
+                addQuestion("Science", "MCQ", "The chemical reaction between copper and oxygen can be categorized as:", 
                 "Displacement reaction|Decomposition reaction|Combination reaction|Double displacement reaction", "3");
         addQuestion("Science", "MCQ", "Opening and closing of stomatal pore depends on:", 
                 "Atmospheric temperature|Oxygen concentration around stomata|Carbon dioxide concentration around stomata|Water content in the guard cells", "4");
@@ -86,164 +244,88 @@ public class QuestionDAO {
                 "India|Sri Lanka|USA|Belgium", "3");
         addQuestion("Social Science", "TRUE_FALSE", "Sri Lanka adopted majoritarianism in its Constitution.", "", "true");
         addQuestion("Social Science", "TRUE_FALSE", "The courier service belongs to the secondary sector of the economy.", "", "false");
-    }
+            
 
-    public boolean addQuestion(String topic, String type, String prompt, String options, String correctAnswer) {
-        String sql = "INSERT INTO questions (topic, type, question_text, options, correct_answer) VALUES (?, ?, ?, ?, ?)";
-        Connection conn = null;
-        PreparedStatement stmt = null;
 
-        try {
-            conn = DatabaseManager.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, topic);
-            stmt.setString(2, type.toUpperCase());
-            stmt.setString(3, prompt);
-            stmt.setString(4, options);
-            stmt.setString(5, correctAnswer);
-
-            return stmt.executeUpdate() > 0;
+                System.out.println("Default questions seeded successfully!");
+            }
         } catch (SQLException e) {
-            System.err.println("Error adding question: " + e.getMessage());
-            return false;
+            System.err.println("Error checking question count: " + e.getMessage());
         } finally {
-            closeResources(null, stmt, conn);
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+            } catch (SQLException e) {
+                System.err.println("Failed to close seed resources: " + e.getMessage());
+            }
         }
     }
-
+/**
+     * Retrieves a randomized list of questions for a specific topic, limited by limit.
+     */
     public List<Question> getRandomQuestionsByTopic(String topic, int limit) {
         List<Question> questions = new ArrayList<>();
-        String sql = "SELECT id, topic, type, question_text, options, correct_answer "
-                   + "FROM questions WHERE topic = ? ORDER BY RANDOM() LIMIT ?";
+        String sql = "SELECT * FROM questions WHERE LOWER(topic) = LOWER(?) ORDER BY RANDOM() LIMIT ?";
+
         Connection conn = null;
-        PreparedStatement stmt = null;
+        PreparedStatement pstmt = null;
         ResultSet rs = null;
 
         try {
-            conn = DatabaseManager.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, topic);
-            stmt.setInt(2, limit);
-            rs = stmt.executeQuery();
+            conn = DatabaseManager.getInstance().getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, topic.trim());
+            pstmt.setInt(2, limit);
+            rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                String id = String.valueOf(rs.getInt("id"));
-                String type = rs.getString("type");
-                String prompt = rs.getString("question_text");
-                String optionsStr = rs.getString("options");
-                String answer = rs.getString("correct_answer");
-
-                if ("MCQ".equalsIgnoreCase(type)) {
-                    List<String> options = Arrays.asList(optionsStr.split("\\|"));
-                    int correctIdx = Integer.parseInt(answer.trim());
-                    questions.add(new SingleChoiceMCQ(id, prompt, 1, options, correctIdx));
-                } else if ("TRUE_FALSE".equalsIgnoreCase(type)) {
-                    boolean correctBool = Boolean.parseBoolean(answer.trim());
-                    questions.add(new TrueFalseQuestion(id, prompt, 1, correctBool));
+                Question q = mapRowToQuestion(rs);
+                if (q != null) {
+                    questions.add(q);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching random questions: " + e.getMessage());
+            System.err.println("Error retrieving random questions for topic " + topic + ": " + e.getMessage());
         } finally {
-            closeResources(rs, stmt, conn);
-        }
-        return questions;
-    }
-
-    public List<Question> getAllQuestions() {
-        List<Question> questions = new ArrayList<>();
-        String sql = "SELECT id, topic, type, question_text, options, correct_answer FROM questions ORDER BY id ASC";
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DatabaseManager.getConnection();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                String id = String.valueOf(rs.getInt("id"));
-                String type = rs.getString("type");
-                String prompt = rs.getString("question_text");
-                String optionsStr = rs.getString("options");
-                String answer = rs.getString("correct_answer");
-
-                if ("MCQ".equalsIgnoreCase(type)) {
-                    List<String> options = Arrays.asList(optionsStr.split("\\|"));
-                    int correctIdx = Integer.parseInt(answer.trim());
-                    questions.add(new SingleChoiceMCQ(id, prompt, 1, options, correctIdx));
-                } else if ("TRUE_FALSE".equalsIgnoreCase(type)) {
-                    boolean correctBool = Boolean.parseBoolean(answer.trim());
-                    questions.add(new TrueFalseQuestion(id, prompt, 1, correctBool));
-                }
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+            } catch (SQLException e) {
+                System.err.println("Failed to close resources: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            System.err.println("Error fetching all questions: " + e.getMessage());
-        } finally {
-            closeResources(rs, stmt, conn);
         }
+
         return questions;
     }
+    /**
+     * Maps a ResultSet row directly to SingleChoiceMCQ or TrueFalseQuestion.
+     */
+    private Question mapRowToQuestion(ResultSet rs) throws SQLException {
+        String idStr = String.valueOf(rs.getInt("id"));
+        String type = rs.getString("type");
+        String prompt = rs.getString("question_text");
+        String options = rs.getString("options");
+        String answer = rs.getString("correct_answer");
+        int points = 1; // Default question value
 
-    public boolean deleteQuestion(int id) {
-        String sql = "DELETE FROM questions WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement stmt = null;
+        if ("MCQ".equalsIgnoreCase(type)) {
+            List<String> optionList = new ArrayList<>();
+            if (options != null && !options.trim().isEmpty()) {
+                optionList = Arrays.asList(options.split("\\|"));
+            }
 
-        try {
-            conn = DatabaseManager.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, id);
+            int correctIndex = 1;
+            try {
+                correctIndex = Integer.parseInt(answer.trim());
+            } catch (NumberFormatException ignored) {}
 
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Error deleting question: " + e.getMessage());
-            return false;
-        } finally {
-            closeResources(null, stmt, conn);
-        }
-    }
+            return new SingleChoiceMCQ(idStr, prompt, points, optionList, correctIndex);
 
-    public boolean updateQuestion(int id, String newPrompt, String newOptions, String newAnswer) {
-        String sql = "UPDATE questions SET question_text = ?, options = ?, correct_answer = ? WHERE id = ?";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-
-        try {
-            conn = DatabaseManager.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, newPrompt);
-            stmt.setString(2, newOptions);
-            stmt.setString(3, newAnswer);
-            stmt.setInt(4, id);
-
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Error updating question: " + e.getMessage());
-            return false;
-        } finally {
-            closeResources(null, stmt, conn);
-        }
-    }
-
-    private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
-        try {
-            if (rs != null) rs.close();
-        } catch (SQLException e) {
-            System.err.println("Failed to close ResultSet: " + e.getMessage());
+        } else if ("TRUE_FALSE".equalsIgnoreCase(type)) {
+            boolean correctBool = Boolean.parseBoolean(answer.trim());
+            return new TrueFalseQuestion(idStr, prompt, points, correctBool);
         }
 
-        try {
-            if (stmt != null) stmt.close();
-        } catch (SQLException e) {
-            System.err.println("Failed to close Statement: " + e.getMessage());
-        }
-
-        try {
-            if (conn != null) conn.close();
-        } catch (SQLException e) {
-            System.err.println("Failed to close Connection: " + e.getMessage());
-        }
+        return null;
     }
 }
