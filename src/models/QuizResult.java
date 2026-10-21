@@ -1,7 +1,6 @@
 package models;
 
-public class QuizResult
-{
+public class QuizResult{
     private int resultId;
     private int userId;
     private String username;
@@ -10,10 +9,7 @@ public class QuizResult
     private int correctAnswers;
     private int score;
 
-    public QuizResult(int resultId, int userId,
-                      String username, String topic,
-                      int totalQuestions, int correctAnswers)
-    {
+    public QuizResult(int resultId, int userId,String username, String topic,int totalQuestions, int correctAnswers){
         this.resultId = resultId;
         this.userId = userId;
         this.username = username;
@@ -23,43 +19,35 @@ public class QuizResult
         this.score = correctAnswers;
     }
 
-    public int getResultId()
-    {
+    public int getResultId(){
         return resultId;
     }
 
-    public int getUserId()
-    {
+    public int getUserId(){
         return userId;
     }
 
-    public String getUsername()
-    {
+    public String getUsername(){
         return username;
     }
 
-    public String getTopic()
-    {
+    public String getTopic(){
         return topic;
     }
 
-    public int getTotalQuestions()
-    {
+    public int getTotalQuestions(){
         return totalQuestions;
     }
 
-    public int getCorrectAnswers()
-    {
+    public int getCorrectAnswers(){
         return correctAnswers;
     }
 
-    public int getScore()
-    {
+    public int getScore(){
         return score;
     }
 
-    public void displayResult()
-    {
+    public void displayResult(){
         System.out.println("\n========== QUIZ RESULT ==========");
         System.out.println("Student: " + username);
         System.out.println("Subject: " + topic);

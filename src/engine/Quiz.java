@@ -2,56 +2,46 @@ package engine;
 
 import models.StudentUser;
 
-public class Quiz
-{
+public class Quiz{
     private StudentUser student;
     private String topic;
     private int totalQuestions;
     private int correctAnswers;
 
-    public Quiz(StudentUser student, String topic, int totalQuestions)
-    {
+    public Quiz(StudentUser student, String topic, int totalQuestions){
         this.student = student;
         this.topic = topic;
         this.totalQuestions = totalQuestions;
         this.correctAnswers = 0;
     }
 
-    public StudentUser getStudent()
-    {
+    public StudentUser getStudent(){
         return student;
     }
 
-    public String getTopic()
-    {
+    public String getTopic(){
         return topic;
     }
 
-    public int getTotalQuestions()
-    {
+    public int getTotalQuestions(){
         return totalQuestions;
     }
 
-    public int getCorrectAnswers()
-    {
+    public int getCorrectAnswers(){
         return correctAnswers;
     }
 
-    public void addCorrectAnswer()
-    {
-        if (correctAnswers < totalQuestions)
-        {
+    public void addCorrectAnswer(){
+        if (correctAnswers < totalQuestions){
             correctAnswers++;
         }
     }
 
-    public int getScore()
-    {
+    public int getScore(){
         return correctAnswers;
     }
 
-    public void displayQuizStatus()
-    {
+    public void displayQuizStatus(){
         System.out.println("\n========== QUIZ STATUS ==========");
         System.out.println("Student: " + student.getUsername());
         System.out.println("Selected Subject: " + topic);
