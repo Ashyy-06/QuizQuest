@@ -26,5 +26,6 @@ replay_pid*
 *.sqlite
 *.sqlite3
 
+
 # Ignore machine-specific VS Code folder/files
 .vscode/
