@@ -2,7 +2,7 @@ package ui;
 
 import database.UserDAO;
 import models.Admin;
-import models.StudentUser;
+import models.StudentUser;  
 import models.User;
 
 import javax.swing.*;
