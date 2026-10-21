@@ -18,7 +18,13 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new AuthView();
+                try {
+                    AuthView view = new AuthView();
+                    view.setVisible(true);
+                } catch (Throwable t) {
+                    System.err.println("CRASH DURING AUTHVIEW LAUNCH:");
+                    t.printStackTrace();
+                }
             }
         });
     }
