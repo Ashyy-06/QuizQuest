@@ -1,9 +1,0 @@
-{
-    "java.project.referencedLibraries": [
-        "lib\\sqlite-jdbc-3.53.1.0.jar",
-        "c:\\Users\\ASHYA\\OneDrive\\Desktop\\QuizQuest\\lib\\sqlite-jdbc-3.53.1.0.jar"
-    ],
-    "java.project.sourcePaths": [
-        "src"
-    ]
-}
