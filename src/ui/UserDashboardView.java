@@ -1,5 +1,6 @@
 package ui;
 
+import database.QuestionDAO;
 import database.QuizResultDAO;
 import engine.QuizManager;
 import engine.QuoteService;
@@ -34,11 +35,13 @@ public class UserDashboardView extends JFrame implements ActionListener {
     private JButton scorecardButton;
     private JButton logoutButton;
     private QuizResultDAO resultDAO;
+    private QuestionDAO questionDAO;
     private QuoteService quoteService;
 
     public UserDashboardView(User user) {
         this.user = user;
         this.resultDAO = new QuizResultDAO();
+        this.questionDAO = new QuestionDAO();
         this.quoteService = new QuoteService();
 
         setTitle("QuizQuest - Student Dashboard");
@@ -51,7 +54,14 @@ public class UserDashboardView extends JFrame implements ActionListener {
 
         JLabel welcomeLabel = new JLabel("Welcome, " + this.user.getUsername() + "!", JLabel.CENTER);
         JLabel topicLabel = new JLabel("Select a Quiz Topic:");
-        topicBox = new JComboBox<>(new String[]{"Science", "Social Science"});
+        
+        // Dynamically populate topics directly from database
+        List<String> availableTopics = questionDAO.getAllTopics();
+        if (availableTopics != null && !availableTopics.isEmpty()) {
+            topicBox = new JComboBox<>(availableTopics.toArray(new String[0]));
+        } else {
+            topicBox = new JComboBox<>(new String[]{"No Topics Available"});
+        }
 
         startButton = new JButton("Start Quiz");
         instructionsButton = new JButton("Instructions");
@@ -107,8 +117,8 @@ public class UserDashboardView extends JFrame implements ActionListener {
      */
     private void startQuizFlow() {
         String topic = (String) topicBox.getSelectedItem();
-        if (topic == null) {
-            JOptionPane.showMessageDialog(this, "Please select a quiz topic.", "Warning", JOptionPane.WARNING_MESSAGE);
+        if (topic == null || "No Topics Available".equals(topic)) {
+            JOptionPane.showMessageDialog(this, "No valid quiz topic selected or available.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
