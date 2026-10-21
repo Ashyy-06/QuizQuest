@@ -68,8 +68,11 @@ public class UserDashboardView extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(this, "Selected Topic: " + topic + "\nQuiz functionality will be connected next.");
         }
         else if (e.getSource() == InstructionsButton) {
-            JOptionPane.showMessageDialog(this, "Instructions:\n1. Select a quiz topic.\n2. Answer each questions.\n3. Submit your answers.\n4. View your score.");
-        } else if (e.getSource() == scorecardButton) {
+            JOptionPane.showMessageDialog(this, 
+        "Instructions:\n1. Select a quiz topic.\n2. Answer each question.\n3. Submit your answers.\n4. View your score.",
+        "Quiz Instructions",
+        JOptionPane.INFORMATION_MESSAGE);
+        }else if (e.getSource() == scorecardButton) {
             JOptionPane.showMessageDialog(this, "Your scorecard will be connected next.");
         } else if (e.getSource() == logoutButton) {
             dispose();
