@@ -111,28 +111,32 @@ public class AdminDashboardView extends JFrame implements ActionListener {
     }
     
     private void viewQuestions() {
+    List<Question> questions = questionDAO.getAllQuestions();
 
-        List<Question> questions = questionDAO.getAllQuestions();
-
-        if (questions == null || questions.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No questions available.");
-            return;
-        }
-
-        StringBuilder details = new StringBuilder();
-
-        for (Question question : questions) {
-            details.append(question.getPrompt()).append("\n\n");
-        }
-
-        JTextArea textArea = new JTextArea(details.toString());
-        textArea.setEditable(false);
-
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(400, 300));
-
-        JOptionPane.showMessageDialog(this, scrollPane, "All Questions",JOptionPane.INFORMATION_MESSAGE);
+    if (questions == null || questions.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No questions available.", "All Questions", JOptionPane.INFORMATION_MESSAGE);
+        return;
     }
+
+    StringBuilder details = new StringBuilder();
+
+    for (Question question : questions) {
+        details.append("[ID: ").append(question.getId()).append("] ")
+               .append(question.getPrompt())
+               .append(" (").append(question.getPoints()).append(" pts)")
+               .append("\n\n");
+    }
+
+    JTextArea textArea = new JTextArea(details.toString());
+    textArea.setEditable(false);
+    textArea.setLineWrap(true);
+    textArea.setWrapStyleWord(true); // Wraps long question text cleanly onto new lines
+
+    JScrollPane scrollPane = new JScrollPane(textArea);
+    scrollPane.setPreferredSize(new Dimension(450, 300));
+
+    JOptionPane.showMessageDialog(this, scrollPane, "All Questions", JOptionPane.INFORMATION_MESSAGE);
+}
 
 
     private void deleteQuestion() {
