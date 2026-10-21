@@ -22,7 +22,7 @@ public class QuestionDAO {
         boolean isEmpty = false;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(countSql);
             if (rs.next() && rs.getInt(1) == 0) {
@@ -94,7 +94,7 @@ public class QuestionDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, topic);
             stmt.setString(2, type.toUpperCase());
@@ -120,7 +120,7 @@ public class QuestionDAO {
         ResultSet rs = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, topic);
             stmt.setInt(2, limit);
@@ -158,7 +158,7 @@ public class QuestionDAO {
         ResultSet rs = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -192,7 +192,7 @@ public class QuestionDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, id);
 
@@ -211,7 +211,7 @@ public class QuestionDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, newPrompt);
             stmt.setString(2, newOptions);

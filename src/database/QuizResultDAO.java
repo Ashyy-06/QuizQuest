@@ -13,7 +13,7 @@ public class QuizResultDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userId);
             stmt.setString(2, topic);
@@ -42,7 +42,7 @@ public class QuizResultDAO {
         ResultSet rs = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, userId);
             rs = stmt.executeQuery();
@@ -77,7 +77,7 @@ public class QuizResultDAO {
         ResultSet rs = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -105,7 +105,7 @@ public class QuizResultDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, resultId);
 
@@ -124,7 +124,7 @@ public class QuizResultDAO {
         PreparedStatement stmt = null;
 
         try {
-            conn = DatabaseManager.getConnection();
+            conn = DatabaseManager.getInstance().getConnection();
             stmt = conn.prepareStatement(sql);
             stmt.setInt(1, newScore);
             stmt.setInt(2, newTotal);

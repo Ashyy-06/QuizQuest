@@ -8,21 +8,37 @@ import java.sql.Statement;
 public class DatabaseManager {
 
     private static final String DB_URL = "jdbc:sqlite:quizquest.db";
+    
+    // 1. Private static instance
+    private static DatabaseManager instance;
+    private Connection connection;
 
-    static {
+    // 2. Private constructor prevents instantiation with 'new'
+    private DatabaseManager() {
         try {
-            // Explicitly force the JVM to register the SQLite driver
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            System.err.println("CRITICAL: SQLite JDBC Driver class not found in classpath: " + e.getMessage());
+            System.err.println("CRITICAL: SQLite JDBC Driver not found: " + e.getMessage());
         }
     }
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL);
+    // 3. Global access point
+    public static synchronized DatabaseManager getInstance() {
+        if (instance == null) {
+            instance = new DatabaseManager();
+        }
+        return instance;
     }
 
-    public static void initializeDatabase() {
+    // Instance method returning the managed connection
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(DB_URL);
+        }
+        return connection;
+    }
+
+    public void initializeDatabase() {
         String createUsersTable = "CREATE TABLE IF NOT EXISTS users ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "username TEXT UNIQUE NOT NULL, "
@@ -45,8 +61,8 @@ public class DatabaseManager {
                 + "total INTEGER NOT NULL, "
                 + "date_taken TEXT NOT NULL)";
 
-        Connection conn = null;
         Statement stmt = null;
+        Connection conn = null;
 
         try {
             conn = getConnection();
@@ -60,9 +76,8 @@ public class DatabaseManager {
         } finally {
             try {
                 if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
             } catch (SQLException e) {
-                System.err.println("Failed to close DB resources: " + e.getMessage());
+                System.err.println("Failed to close statement: " + e.getMessage());
             }
         }
     }

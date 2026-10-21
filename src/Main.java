@@ -7,7 +7,7 @@ import ui.AuthView;
 public class Main {
     public static void main(String[] args) {
 
-        DatabaseManager.initializeDatabase();
+        DatabaseManager.getInstance().initializeDatabase();
 
         QuestionDAO questionDAO = new QuestionDAO();
         questionDAO.seedQuestionsIfEmpty();
