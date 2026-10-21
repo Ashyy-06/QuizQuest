@@ -10,8 +10,7 @@ public class Main {
         DatabaseManager.getInstance().initializeDatabase();
 
         QuestionDAO questionDAO = new QuestionDAO();
-        questionDAO.seedQuestionsIfEmpty();
-
+        questionDAO.seedDefaultQuestions();
         UserDAO userDAO = new UserDAO();
         userDAO.seedAdminIfEmpty();
 
