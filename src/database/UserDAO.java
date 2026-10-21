@@ -1,6 +1,10 @@
 package database;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import models.Admin;
@@ -8,6 +12,64 @@ import models.StudentUser;
 import models.User;
 
 public class UserDAO {
+
+    public void seedAdminIfEmpty() {
+        String checkSql = "SELECT COUNT(*) FROM users WHERE role = 'ADMIN'";
+        String insertSql = "INSERT INTO users (username, password, role) VALUES ('admin', 'admin123', 'ADMIN')";
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        boolean needsAdmin = false;
+
+        try {
+            conn = DatabaseManager.getConnection();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(checkSql);
+            if (rs.next() && rs.getInt(1) == 0) {
+                needsAdmin = true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking admin existence: " + e.getMessage());
+        } finally {
+            closeResources(rs, stmt, conn);
+        }
+
+        if (needsAdmin) {
+            Connection insertConn = null;
+            Statement insertStmt = null;
+            try {
+                insertConn = DatabaseManager.getConnection();
+                insertStmt = insertConn.createStatement();
+                insertStmt.executeUpdate(insertSql);
+                System.out.println("Default admin created: admin / admin123");
+            } catch (SQLException e) {
+                System.err.println("Error seeding default admin: " + e.getMessage());
+            } finally {
+                closeResources(null, insertStmt, insertConn);
+            }
+        }
+    }
+
+    public boolean register(String username, String password) {
+        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, 'STUDENT')";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DatabaseManager.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error registering user: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources(null, stmt, conn);
+        }
+    }
+
     public User login(String username, String password) {
         String sql = "SELECT id, username, password, role FROM users WHERE username = ? AND password = ?";
         Connection conn = null;
@@ -34,41 +96,15 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Login error: " + e.getMessage());
+            System.err.println("Error during login: " + e.getMessage());
         } finally {
             closeResources(rs, stmt, conn);
         }
         return null;
     }
 
-    public boolean register(String username, String password) {
-        return createUser(username, password, "USER");
-    }
-
-    public boolean createUser(String username, String password, String role) {
-        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-
-        try {
-            conn = DatabaseManager.getConnection();
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-            stmt.setString(3, role.toUpperCase());
-
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            System.err.println("User creation failed: " + e.getMessage());
-            return false;
-        } finally {
-            closeResources(null, stmt, conn);
-        }
-    }
-
     public List<User> getAllUsers() {
-        List<User> userList = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         String sql = "SELECT id, username, password, role FROM users ORDER BY id ASC";
         Connection conn = null;
         Statement stmt = null;
@@ -81,22 +117,22 @@ public class UserDAO {
 
             while (rs.next()) {
                 int id = rs.getInt("id");
-                String username = rs.getString("username");
-                String password = rs.getString("password");
+                String user = rs.getString("username");
+                String pass = rs.getString("password");
                 String role = rs.getString("role");
 
                 if ("ADMIN".equalsIgnoreCase(role)) {
-                    userList.add(new Admin(id, username, password));
+                    users.add(new Admin(id, user, pass));
                 } else {
-                    userList.add(new StudentUser(id, username, password));
+                    users.add(new StudentUser(id, user, pass));
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching users: " + e.getMessage());
+            System.err.println("Error fetching all users: " + e.getMessage());
         } finally {
             closeResources(rs, stmt, conn);
         }
-        return userList;
+        return users;
     }
 
     public boolean updateUser(int userId, String newPassword, String newRole) {
@@ -141,25 +177,19 @@ public class UserDAO {
 
     private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
         try {
-            if (rs != null) {
-                rs.close();
-            }
+            if (rs != null) rs.close();
         } catch (SQLException e) {
             System.err.println("Failed to close ResultSet: " + e.getMessage());
         }
 
         try {
-            if (stmt != null) {
-                stmt.close();
-            }
+            if (stmt != null) stmt.close();
         } catch (SQLException e) {
             System.err.println("Failed to close Statement: " + e.getMessage());
         }
 
         try {
-            if (conn != null) {
-                conn.close();
-            }
+            if (conn != null) conn.close();
         } catch (SQLException e) {
             System.err.println("Failed to close Connection: " + e.getMessage());
         }
